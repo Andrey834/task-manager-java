@@ -5,6 +5,8 @@ import ru.t1.task_manager_aop.dto.TaskDto;
 import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.dto.TaskUpdateDto;
 
+import java.util.List;
+
 public interface TaskService {
 
     TaskDto createTask(TaskRequestDto taskRequestDto);
@@ -13,7 +15,7 @@ public interface TaskService {
 
     TaskDto getTaskById(Long id);
 
-    Iterable<TaskDto> getAllTask(Pageable pageable);
+    List<TaskDto> getAllTask(Pageable pageable);
 
     void deleteTask(Long id);
 }

@@ -19,6 +19,8 @@ import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.dto.TaskUpdateDto;
 import ru.t1.task_manager_aop.service.TaskService;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/tasks")
@@ -32,11 +34,11 @@ public class TaskController {
     }
 
     @GetMapping
-    public Iterable<TaskDto> getAll(@RequestParam(name = "from", required = false, defaultValue = "0")
+    public List<TaskDto> getAll(@RequestParam(name = "from", required = false, defaultValue = "0")
                                     int from,
-                                    @RequestParam(name = "size", required = false, defaultValue = "10")
+                                @RequestParam(name = "size", required = false, defaultValue = "10")
                                     int size,
-                                    @RequestParam(name = "sort", required = false, defaultValue = "ASC")
+                                @RequestParam(name = "sort", required = false, defaultValue = "ASC")
                                     String sort
     ) {
 

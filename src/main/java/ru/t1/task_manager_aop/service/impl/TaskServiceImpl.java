@@ -12,14 +12,16 @@ import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.dto.TaskUpdateDto;
 import ru.t1.task_manager_aop.mapper.TaskMapper;
 import ru.t1.task_manager_aop.model.Task;
-import ru.t1.task_manager_aop.repository.TaskDao;
+import ru.t1.task_manager_aop.repository.TaskRepository;
 import ru.t1.task_manager_aop.service.TaskService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TaskServiceImpl implements TaskService {
-    private final TaskDao taskDao;
+    private final TaskRepository taskRepository;
 
     @Override
     @ValidationTask
@@ -27,7 +29,7 @@ public class TaskServiceImpl implements TaskService {
     @LogReturningObject
     public TaskDto createTask(TaskRequestDto taskRequestDto) {
         final Task task = TaskMapper.requestToTask(taskRequestDto);
-        final Task newTask = taskDao.save(task);
+        final Task newTask = taskRepository.save(task);
         return TaskMapper.taskToDto(newTask);
     }
 
@@ -53,8 +55,8 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     @TimeTracking
     @LogReturningObject
-    public Iterable<TaskDto> getAllTask(Pageable pageable) {
-        return taskDao.findAll(pageable)
+    public List<TaskDto> getAllTask(Pageable pageable) {
+        return taskRepository.findAll(pageable)
                 .map(TaskMapper::taskToDto)
                 .toList();
     }
@@ -63,11 +65,11 @@ public class TaskServiceImpl implements TaskService {
     @TimeTracking
     public void deleteTask(Long id) {
         Task task = getTask(id);
-        taskDao.delete(task);
+        taskRepository.delete(task);
     }
 
     private Task getTask(Long id) {
-        return taskDao.findById(id)
+        return taskRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Task with ID: " + id + " not found"));
     }
 }
