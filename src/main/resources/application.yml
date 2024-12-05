@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: task-manager-aop
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${TM_PG_URL}
+    username: ${TM_PG_USER}
+    password: ${TM_PG_PASSWORD}
+  liquibase:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  port: ${TM_SERVER_PORT}
+
