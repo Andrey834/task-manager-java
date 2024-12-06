@@ -1,7 +1,9 @@
 package ru.t1.task_manager_aop.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.t1.task_manager_aop.annotation.LogReturningObject;
@@ -22,6 +24,9 @@ import java.util.List;
 @Transactional
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Value(value = "${app.kafka.topics.updateTask}")
+    private String updateTopic;
 
     @Override
     @ValidationTask
@@ -40,6 +45,12 @@ public class TaskServiceImpl implements TaskService {
         task.setUserId(taskUpdateDto.userId());
         task.setTitle(taskUpdateDto.title());
         task.setDescription(taskUpdateDto.description());
+
+        if (!task.getStatus().equals(taskUpdateDto.status())) {
+            task.setStatus(taskUpdateDto.status());
+
+            Thread.ofVirtual().start(() -> kafkaTemplate.send(updateTopic, TaskMapper.taskToDto(task)));
+        }
     }
 
     @Override

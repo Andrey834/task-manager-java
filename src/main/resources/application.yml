@@ -5,9 +5,9 @@ spring:
     virtual:
       enabled: true
   datasource:
-    url: ${TM_PG_URL}
-    username: ${TM_PG_USER}
-    password: ${TM_PG_PASSWORD}
+    url: ${TMS_PG_URL}
+    username: ${TMS_PG_USER}
+    password: ${TMS_PG_PASSWORD}
   liquibase:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
@@ -22,6 +22,27 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  kafka:
+    bootstrap-servers: ${TMS_KAFKA_SERVER}
+  mail:
+    username: ${TMS_EMAIL_USER}
+    password: ${TMS_EMAIL_PASSWORD}
+    host: smtp.yandex.ru
+    port: 587
 server:
-  port: ${TM_SERVER_PORT}
+  port: ${TMS_PORT}
+
+app:
+  kafka:
+    consumer:
+      group-id: task-manager
+      sessionTimeout: 15000
+      maxPartitionFetchBytes: 300000
+      maxPollRecords: 1
+      maxPollIntervalsMs: 3000
+    topics:
+      updateTask: update-task-status
+
+
+
 
