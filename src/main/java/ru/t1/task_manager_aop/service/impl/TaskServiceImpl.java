@@ -1,6 +1,8 @@
 package ru.t1.task_manager_aop.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,15 +15,20 @@ import ru.t1.task_manager_aop.dto.TaskUpdateDto;
 import ru.t1.task_manager_aop.mapper.TaskMapper;
 import ru.t1.task_manager_aop.model.Task;
 import ru.t1.task_manager_aop.repository.TaskRepository;
+import ru.t1.task_manager_aop.service.KafkaService;
 import ru.t1.task_manager_aop.service.TaskService;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
+    private final KafkaService kafkaService;
+    @Value(value = "${app.kafka.topics.updateTask}")
+    private String updateTopic;
 
     @Override
     @ValidationTask
@@ -40,6 +47,12 @@ public class TaskServiceImpl implements TaskService {
         task.setUserId(taskUpdateDto.userId());
         task.setTitle(taskUpdateDto.title());
         task.setDescription(taskUpdateDto.description());
+
+        if (!task.getStatus().equals(taskUpdateDto.status())) {
+            task.setStatus(taskUpdateDto.status());
+
+            kafkaService.sendMessage(updateTopic, TaskMapper.taskToDto(task));
+        }
     }
 
     @Override
