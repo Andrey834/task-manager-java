@@ -48,7 +48,6 @@ public class Task {
     @Column(nullable = false, length = 20)
     private TaskStatus status;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

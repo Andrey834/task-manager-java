@@ -10,6 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import ru.t1.task_manager_aop.dto.TaskDto;
@@ -34,7 +35,6 @@ public class KafkaConsumerConfig {
     private String maxPollRecords;
     @Value(value = "${app.kafka.consumer.maxPollIntervalsMs}")
     private String maxPollIntervalsMs;
-
 
     @Bean
     public ConsumerFactory<String, TaskDto> consumerListenerFactory() {
@@ -68,6 +68,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerListenerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 }

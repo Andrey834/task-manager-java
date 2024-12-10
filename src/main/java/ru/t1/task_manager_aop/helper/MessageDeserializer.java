@@ -4,14 +4,9 @@ import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.stereotype.Component;
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class MessageDeserializer<T>  extends JsonDeserializer<T>{
-
-    private static String getMessage(byte[] data) {
-        return new String(data, StandardCharsets.UTF_8);
-    }
 
     @Override
     public T deserialize(String topic, Headers headers, byte[] data) {
@@ -30,5 +25,4 @@ public class MessageDeserializer<T>  extends JsonDeserializer<T>{
             throw new DeserializationException("ОШИБКА! Десериализация", data, false, e);
         }
     }
-
 }
