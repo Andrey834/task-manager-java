@@ -28,6 +28,12 @@ databaseChangeLog:
                   type: varchar(500)
                   constraints:
                     nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: "CREATED"
+                  constraints:
+                    nullable: false
         - createSequence:
             sequenceName: SEQ_TASK
             startValue: 1
