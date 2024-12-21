@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: tms-test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    url: jdbc:h2:mem:task
+    username: sa
+    password: password
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: false
+  mail:
+    username: test
+    password: test
+    host: smtp.test.ru
+    port: 587
+  kafka:
+    template:
+      default-topic:
+app:
+  kafka:
+    consumer:
+      group-id: task-manager
+      sessionTimeout: 15000
+      maxPartitionFetchBytes: 300000
+      maxPollRecords: 1
+      maxPollIntervalsMs: 3000
+    topics:
+      updateTask: update-task-status
