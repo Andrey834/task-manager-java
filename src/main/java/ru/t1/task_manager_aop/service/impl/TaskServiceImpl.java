@@ -6,9 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.t1.task_manager_aop.annotation.LogReturningObject;
-import ru.t1.task_manager_aop.annotation.TimeTracking;
-import ru.t1.task_manager_aop.annotation.ValidationTask;
 import ru.t1.task_manager_aop.dto.TaskDto;
 import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.dto.TaskUpdateDto;
@@ -31,9 +28,6 @@ public class TaskServiceImpl implements TaskService {
     private String updateTopic;
 
     @Override
-    @ValidationTask
-    @TimeTracking
-    @LogReturningObject
     public TaskDto createTask(TaskRequestDto taskRequestDto) {
         final Task task = TaskMapper.requestToTask(taskRequestDto);
         final Task newTask = taskRepository.save(task);
@@ -41,8 +35,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    @TimeTracking
-    public void updateTask(Long taskId, TaskUpdateDto taskUpdateDto) {
+    public TaskDto updateTask(Long taskId, TaskUpdateDto taskUpdateDto) {
         Task task = getTask(taskId);
         task.setUserId(taskUpdateDto.userId());
         task.setTitle(taskUpdateDto.title());
@@ -53,12 +46,12 @@ public class TaskServiceImpl implements TaskService {
 
             kafkaService.sendMessage(updateTopic, TaskMapper.taskToDto(task));
         }
+
+        return TaskMapper.taskToDto(task);
     }
 
     @Override
     @Transactional(readOnly = true)
-    @TimeTracking
-    @LogReturningObject
     public TaskDto getTaskById(Long id) {
         final Task task = getTask(id);
         return TaskMapper.taskToDto(task);
@@ -66,8 +59,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    @TimeTracking
-    @LogReturningObject
     public List<TaskDto> getAllTask(Pageable pageable) {
         return taskRepository.findAll(pageable)
                 .map(TaskMapper::taskToDto)
@@ -75,7 +66,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    @TimeTracking
     public void deleteTask(Long id) {
         Task task = getTask(id);
         taskRepository.delete(task);
