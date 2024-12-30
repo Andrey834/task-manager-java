@@ -48,6 +48,9 @@ public class TaskController {
                 Sort.by(Sort.Direction.fromString(sort),
                         "id")
         );
+        System.out.println(pageable.getPageSize());
+        System.out.println(pageable.getPageNumber());
+        System.out.println(pageable.getOffset());
 
         return taskService.getAllTask(pageable);
     }
@@ -58,9 +61,9 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}")
-    public void update(@PathVariable("taskId") Long taskId,
+    public TaskDto update(@PathVariable("taskId") Long taskId,
                        @RequestBody TaskUpdateDto taskUpdateDto) {
-        taskService.updateTask(taskId, taskUpdateDto);
+        return taskService.updateTask(taskId, taskUpdateDto);
     }
 
     @DeleteMapping("/{taskId}")
