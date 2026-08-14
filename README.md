@@ -20,7 +20,7 @@ Producer и consumer живут в одном приложении (учебна
 - **Spring Kafka** — продюсер и consumer
 - **PostgreSQL** + **Liquibase** — версионируемые миграции схемы
 - **Spring Mail** — email-уведомления
-- **Docker / Docker Compose** — приложение, PostgreSQL, Kafka + Zookeeper, Kafka UI
+- **Docker / Docker Compose** — приложение, PostgreSQL, Kafka (KRaft, без ZooKeeper), Kafka UI
 - **JUnit 5, Testcontainers** (PostgreSQL и Kafka) — интеграционные тесты с реальными брокером и БД, а не эмуляцией
 
 ## Kafka — что именно реализовано
@@ -48,7 +48,7 @@ cp .env.example .env   # заполнить реальными значения�
 docker compose up -d
 ```
 
-Поднимутся: приложение, PostgreSQL, Kafka + Zookeeper, [Kafka UI](http://localhost:9879) для визуальной отладки топиков и сообщений.
+Поднимутся: приложение, PostgreSQL, Kafka (KRaft, без ZooKeeper), [Kafka UI](http://localhost:9879) для визуальной отладки топиков и сообщений.
 
 ## Тесты
 
