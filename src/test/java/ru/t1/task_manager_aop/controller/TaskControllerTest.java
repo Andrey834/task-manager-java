@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,6 +83,23 @@ class TaskControllerTest extends PostgresTestContainer {
 
         actualSize = taskRepository.findAll().size();
         assertEquals(expectedSize, actualSize);
+    }
+
+    @ParameterizedTest(name = "userId={0}, title={1}, description={2}")
+    @CsvSource(value = {
+            "null, title, description",
+            "1, null, description",
+            "1, title, null",
+    }, nullValues = "null")
+    @DisplayName("create(TaskRequestDto) Тест на ошибку при отсутствии обязательного поля")
+    void create_whenRequiredFieldMissing_thenReturnBadRequest(Long userId, String title, String description) throws Exception {
+        TaskRequestDto taskRequestDto = new TaskRequestDto(userId, title, description);
+
+        mockMvc.perform(post(prefixPath)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(taskRequestDto))
+                )
+                .andExpect(status().isBadRequest());
     }
 
 

@@ -3,6 +3,8 @@ package ru.t1.task_manager_aop.mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import ru.t1.task_manager_aop.dto.TaskDto;
 import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.enums.TaskStatus;
@@ -71,5 +73,19 @@ class TaskMapperTest {
 
         Class<TaskDto> expectedClass = TaskDto.class;
         assertEquals(expectedClass, actualTask.getClass());
+    }
+
+    @ParameterizedTest(name = "статус {0}")
+    @EnumSource(TaskStatus.class)
+    @DisplayName("taskToDto(Task) корректно маппит задачу для любого значения TaskStatus")
+    void taskToDto_forEveryStatus(TaskStatus status) {
+        Task taskWithStatus = new Task(task.getId(), task.getUserId(), task.getTitle(),
+                task.getDescription(), status);
+
+        TaskDto actualTaskDto = TaskMapper.taskToDto(taskWithStatus);
+
+        assertEquals(status, actualTaskDto.status());
+        assertEquals(taskWithStatus.getId(), actualTaskDto.id());
+        assertEquals(taskWithStatus.getUserId(), actualTaskDto.userId());
     }
 }

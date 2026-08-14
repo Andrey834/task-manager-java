@@ -48,9 +48,6 @@ public class TaskController {
                 Sort.by(Sort.Direction.fromString(sort),
                         "id")
         );
-        System.out.println(pageable.getPageSize());
-        System.out.println(pageable.getPageNumber());
-        System.out.println(pageable.getOffset());
 
         return taskService.getAllTask(pageable);
     }

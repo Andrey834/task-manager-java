@@ -5,12 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.t1.task_manager_aop.dto.TaskDto;
 import ru.t1.task_manager_aop.dto.TaskRequestDto;
 import ru.t1.task_manager_aop.dto.TaskUpdateDto;
@@ -24,10 +27,16 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceImplTest {
+    private static final String UPDATE_TOPIC = "update-task-status";
+
     @Mock
     private TaskRepository repository;
     @Mock
@@ -39,6 +48,8 @@ class TaskServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(taskService, "updateTopic", UPDATE_TOPIC);
+
         Long taskId1 = 1L;
         Long userId1 = 1L;
         String testTitle1 = "testTitle1";
@@ -88,6 +99,33 @@ class TaskServiceImplTest {
         assertEquals(updatedTitle, actualTaskDto.title());
         assertEquals(updatedDescription, actualTaskDto.description());
         assertEquals(status, actualTaskDto.status());
+    }
+
+    @ParameterizedTest(name = "{0} -> {1}: событие в Kafka отправлено = {2}")
+    @CsvSource({
+            "CREATED, IN_PROGRESS, true",
+            "IN_PROGRESS, COMPLETED, true",
+            "IN_PROGRESS, REJECTED, true",
+            "CREATED, CREATED, false",
+            "COMPLETED, COMPLETED, false",
+    })
+    @DisplayName("updateTask(Long, TaskUpdateDto) публикует событие в Kafka только при реальной смене статуса")
+    void updateTask_publishesKafkaEventOnlyOnStatusChange(TaskStatus currentStatus,
+                                                            TaskStatus newStatus,
+                                                            boolean shouldSendEvent) {
+        task2.setStatus(currentStatus);
+        when(repository.findById(task2.getId())).thenReturn(Optional.of(task2));
+
+        TaskUpdateDto taskUpdateDto = new TaskUpdateDto(
+                task2.getUserId(), task2.getTitle(), task2.getDescription(), newStatus);
+
+        taskService.updateTask(task2.getId(), taskUpdateDto);
+
+        if (shouldSendEvent) {
+            verify(kafkaService, times(1)).sendMessage(eq(UPDATE_TOPIC), any(TaskDto.class));
+        } else {
+            verify(kafkaService, never()).sendMessage(any(), any());
+        }
     }
 
     @Test

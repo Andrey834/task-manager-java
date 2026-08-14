@@ -1,12 +1,19 @@
 FROM maven:3.9.9-amazoncorretto-21 AS build
-ENV HOME=/app
-RUN mkdir -p $HOME
-WORKDIR $HOME
-ADD pom.xml $HOME
-RUN mvn verify --fail-never
-ADD . $HOME
-RUN mvn package
+WORKDIR /app
+
+# кэшируем зависимости отдельным слоем — меняются реже, чем исходники
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+
+COPY src ./src
+# юнит- и интеграционные тесты (Testcontainers) гоняются отдельным шагом в CI,
+# где есть прямой доступ к Docker-демону, а не внутри самой сборки образа
+RUN mvn -B package -DskipTests
 
 FROM amazoncorretto:21.0.5-alpine
-COPY --from=build /app/target/*.jar /app.jar
-CMD ["java", "-jar", "/app.jar"]
+RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+USER app
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
